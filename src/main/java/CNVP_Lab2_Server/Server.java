@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.util.LinkedList;
 
 public class Server {
-    public static final int port = 8080;
+    public static final int port = 5542;
     public static LinkedList<ThreadsRepository> serverList = new LinkedList<>(); // список всех нитей
 
 
