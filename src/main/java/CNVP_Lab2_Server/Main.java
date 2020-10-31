@@ -8,13 +8,30 @@ import java.net.Socket;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        ServerSocket server = new ServerSocket(5542, 10, InetAddress.getByName("127.0.0.1"));
+        ServerSocket server = Server.createServer();
+        System.out.println("Server is running");
+        StopServer stopServer = new StopServer();
+        boolean status = true;
         try {
-            while (true) {
-                // Блокируется до возникновения нового соединения:
-                Socket socket = server.accept();// новий потік
-                Server.serverList.add(new ThreadsRepository(socket));
+            stopServer.start();
+            while (StopServer.status) {
+                Socket socket = server.accept();
+                System.out.println("socket is connected");
+                try {
+                    ThreadsRepository threadsRepository = new ThreadsRepository(socket);
+                    Server.serverList.add(threadsRepository);
+                    try {
+                        threadsRepository.join();
+                    } catch (InterruptedException exception) {
+                        exception.printStackTrace();
+                    }
+                } catch (IOException e) {
+                    socket.close();
+                }
             }
+            stopServer.join();
+        } catch (InterruptedException exception) {
+            exception.printStackTrace();
         } finally {
             server.close();
         }
