@@ -20,31 +20,26 @@ public class ClientListenerThread extends Thread {
     @Override
     public void run() {
         System.out.println("Listener thread started for " + this.socket.getInetAddress());
-        String message;
         try {
-            while (StopServer.status) {
+            while (Server.isRunning) {
                 if (Server.serverList.size() > 0) {
-                    message = reader.readLine();
-                    System.out.println(message);
+                    String message = reader.readLine();
+                    System.out.println(message);   //TODO: remove to avoid showing sensitive data
                     String operation = JsonParser.deserializeOperation(message);
                     for (ClientListenerThread thread : Server.serverList) {
                         if (thread != this) {
                             thread.send(message);
-                        } else {
-                            if (operation.equals("UserConnection")) {
-                                Story.printStory(writer);
-                            }
                         }
-                        if (operation.equals("Disconnect")) {
-                            this.downService();
-                            break;
-                        }
+                    }
+                    if (operation.equals("Disconnect")) {
+                        this.shutdown();
+                        break;
                     }
                 } else break;
             }
 
         } catch (SocketException exception) {
-            if (!StopServer.status) {
+            if (!Server.isRunning) {
                 System.out.println("Listener thread stopped for " + this.socket.getInetAddress());
             } else {
                 exception.printStackTrace();
@@ -54,27 +49,26 @@ public class ClientListenerThread extends Thread {
         }
     }
 
-
     private void send(String message) {
         try {
             writer.write(message + "\n");
             writer.flush();
-        } catch (IOException ignored) {
+        } catch (IOException exception) {
+            System.out.println("failed to send message");
+            exception.printStackTrace();
         }
     }
 
-    private void downService() {
+    private void shutdown() {
         try {
             if (!socket.isClosed()) {
                 socket.close();
-                reader.close();
-                writer.close();
-                for (ClientListenerThread repository : Server.serverList) {
-                    if (repository.equals(this)) repository.interrupt();
-                    Server.serverList.remove(this);
-                }
             }
-        } catch (IOException ignored) {
+            reader.close();
+            writer.close();
+            Server.serverList.remove(this);
+        } catch (IOException exception) {
+            exception.printStackTrace();
         }
     }
 }

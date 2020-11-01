@@ -8,36 +8,20 @@ import java.net.Socket;
 public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        ServerSocket server = Server.server;
+        ServerSocket server = Server.getServer();
         System.out.println("Server is running");
-        StopServer stopServer = new StopServer();
-        boolean status = StopServer.status;
+        ServerShutdownThread serverShutdownThread = new ServerShutdownThread();
         try {
-            stopServer.start();
-            //Semaphore semaphore = new Semaphore(10);    TODO: ??????
-            while (status) {
-                if (stopServer.isAlive()) {
-                    //semaphore.acquire();
-                    Socket socket = server.accept();
-                    System.out.println("socket is connected");
-                    try {
-                        ClientListenerThread threadsRepository = new ClientListenerThread(socket);
-                        Server.serverList.add(threadsRepository);
-                        // try {  TODO:JOIN
-                        //   threadsRepository.join();
-                        // } catch (InterruptedException exception) {
-                        //     exception.printStackTrace();
-                        // }
-                    } catch (IOException e) {
-                        socket.close();
-                    } //finally {
-                    //semaphore.release();
-                    //}
-                }
+            serverShutdownThread.start();
+            while (Server.isRunning) {
+                Socket socket = server.accept();
+                System.out.println("socket is connected");
+                ClientListenerThread clientListenerThread = new ClientListenerThread(socket);
+                Server.serverList.add(clientListenerThread);
             }
-            stopServer.join();
+            serverShutdownThread.join();
         } catch (IOException ioException) {
-            if (!StopServer.status) {
+            if (!Server.isRunning) {
                 System.out.println("server closed");
             } else {
                 throw ioException;
