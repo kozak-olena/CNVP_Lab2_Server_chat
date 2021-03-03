@@ -24,7 +24,7 @@ public class ClientListenerThread extends Thread {
             while (Server.isRunning) {
                 if (Server.serverList.size() > 0) {
                     String message = reader.readLine();
-                    System.out.println(message);   //TODO: remove to avoid showing sensitive data
+                    System.out.println(message);                //TODO: remove to avoid showing sensitive data
                     String operation = JsonParser.deserializeOperation(message);
                     for (ClientListenerThread thread : Server.serverList) {
                         if (thread != this) {

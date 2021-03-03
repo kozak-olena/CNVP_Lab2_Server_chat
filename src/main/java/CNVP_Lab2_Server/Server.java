@@ -17,14 +17,13 @@ public class Server {
             System.out.println("enter port");
             int port = scanner.nextInt();
             try {
-                server = new ServerSocket(port, 10, InetAddress.getByName("127.0.0.1")); //TODO:IP from console
+                server = new ServerSocket(port, 5, InetAddress.getByName("127.0.0.1"));
             } catch (IOException exception) {
                 exception.printStackTrace();
             }
         }
         return server;
     }
-
 }
 
 

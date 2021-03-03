@@ -1,6 +1,5 @@
 package CNVP_Lab2_Server;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -13,5 +12,4 @@ public class JsonParser {
         String operation = json.get("operation").textValue();
         return operation;
     }
-
 }
